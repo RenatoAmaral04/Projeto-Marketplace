@@ -1,10 +1,23 @@
 import { Home, Grid, Box, Headphones, User, LogOut } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useContext } from 'react';
 import { AuthContext } from '../../../contexts/AuthContext';
 
 export const Sidebar = () => {
-  const { usuario, loginMockado, logout } = useContext(AuthContext);
+  const { usuario, logout } = useContext(AuthContext);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleScrollToProducts = () => {
+    if (location.pathname !== '/') {
+      navigate('/');
+      setTimeout(() => {
+        document.getElementById('produtos')?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    } else {
+      document.getElementById('produtos')?.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
 
   return (
     <aside className="w-20 bg-slate-950 border-r border-slate-800 flex flex-col items-center py-8 gap-8 hidden md:flex shadow-2xl z-40">
@@ -12,11 +25,19 @@ export const Sidebar = () => {
         <Home size={24} />
       </Link>
       
-      <a href="#produtos" className="text-slate-500 hover:text-purple-400 transition-colors cursor-pointer"><Grid size={24} /></a>
-     <Link to="/dashboard" className="text-slate-500 hover:text-purple-400 transition-colors cursor-pointer" title="Dashboard">
-  <Box size={24} />
-</Link>
-      <a href="#produtos" className="text-slate-500 hover:text-purple-400 transition-colors cursor-pointer"><Headphones size={24} /></a>
+      <button onClick={handleScrollToProducts} className="text-slate-500 hover:text-purple-400 transition-colors cursor-pointer">
+        <Grid size={24} />
+      </button>
+      
+      {usuario?.perfil === 'PERFIL_ADMIN' && (
+        <Link to="/dashboard" className="text-slate-500 hover:text-purple-400 transition-colors cursor-pointer" title="Dashboard">
+          <Box size={24} />
+        </Link>
+      )}
+
+      <button onClick={handleScrollToProducts} className="text-slate-500 hover:text-purple-400 transition-colors cursor-pointer">
+        <Headphones size={24} />
+      </button>
       
       <div className="mt-auto flex flex-col gap-4">
         {usuario ? (
@@ -24,9 +45,9 @@ export const Sidebar = () => {
             <LogOut size={24} />
           </button>
         ) : (
-          <button onClick={loginMockado} className="text-slate-500 hover:text-lime-400 transition-colors cursor-pointer" title="Fazer Login">
+          <Link to="/login" className="text-slate-500 hover:text-lime-400 transition-colors cursor-pointer" title="Fazer Login">
             <User size={24} />
-          </button>
+          </Link>
         )}
       </div>
     </aside>

@@ -3,7 +3,7 @@ import { Usuario } from '../types/Usuario';
 
 interface AuthContextData {
   usuario: Usuario | null;
-  loginMockado: () => void;
+  login: (email: string, senha: string) => Promise<boolean>;
   logout: () => void;
 }
 
@@ -12,30 +12,29 @@ export const AuthContext = createContext<AuthContextData>({} as AuthContextData)
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [usuario, setUsuario] = useState<Usuario | null>(null);
 
-  // Função que chama o nosso AuthController no Java
-  const loginMockado = async () => {
+  const login = async (email: string, senha: string) => {
     try {
-      const response = await fetch('http://127.0.0.1:8080/api/auth/login', {
+      const response = await fetch('http://localhost:8080/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: 'admin@nexora.com', senha: '1234' })
+        body: JSON.stringify({ email, senha })
       });
       if (response.ok) {
         const data = await response.json();
-        setUsuario({ nome: data.nome, email: data.email, perfil: 'PERFIL_ADMIN' });
-        alert(`Bem-vindo, ${data.nome}!`);
-      } else {
-        alert("Erro no login");
+        setUsuario(data); // Salva o admin ou o cliente
+        return true;
       }
+      return false;
     } catch (error) {
-      alert("Erro ao conectar com o Java para o Login.");
+      console.error("Erro no login", error);
+      return false;
     }
   };
 
   const logout = () => setUsuario(null);
 
   return (
-    <AuthContext.Provider value={{ usuario, loginMockado, logout }}>
+    <AuthContext.Provider value={{ usuario, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
